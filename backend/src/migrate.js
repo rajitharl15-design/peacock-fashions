@@ -52,18 +52,14 @@ export async function migrate() {
   await pool.query(`CREATE INDEX IF NOT EXISTS peacock_orders_created_idx ON ${q('orders')} (created_at DESC)`);
   await pool.query(`CREATE INDEX IF NOT EXISTS peacock_orders_number_idx ON ${q('orders')} (order_number)`);
 
-  // One-time import of data from the old shared (public) Peacock tables so the
-  // standalone store keeps its published catalog, orders and admin login. A
-  // marker row makes this strictly once-only, even if the store is empty later.
+  // One-time import of orders and admin login from the old shared (public)
+  // Peacock tables. The catalog is NOT imported: the canonical Peacock catalog
+  // is the bundled js/peacock-data.js (the old backend copy was stale and also
+  // contained Raaji's Sarees/Jewellery). A marker makes this strictly once-only.
   await pool.query(`
     DO $mig$
     BEGIN
       IF NOT EXISTS (SELECT 1 FROM ${q('meta')} WHERE key = 'shared_import_v1') THEN
-        IF to_regclass('public.peacock_catalog') IS NOT NULL THEN
-          INSERT INTO ${q('catalog')} (id, products, updated_at)
-          SELECT id, products, updated_at FROM public.peacock_catalog
-          ON CONFLICT (id) DO NOTHING;
-        END IF;
         IF to_regclass('public.peacock_orders') IS NOT NULL THEN
           INSERT INTO ${q('orders')} (order_number, customer_name, phone, address, items, total, status, payment_status, created_at)
           SELECT order_number, customer_name, phone, address, items, total, status, payment_status, created_at
@@ -76,6 +72,25 @@ export async function migrate() {
           ON CONFLICT (username) DO NOTHING;
         END IF;
         INSERT INTO ${q('meta')} (key, value) VALUES ('shared_import_v1', NOW()::text);
+      END IF;
+    END
+    $mig$;
+  `);
+
+  // Early standalone deployments imported the stale old backend catalog
+  // (including Sarees/Jewellery). Remove that one-time import so the storefront
+  // falls back to the curated bundled catalog. A marker prevents future wipes.
+  await pool.query(`
+    DO $mig$
+    BEGIN
+      IF NOT EXISTS (SELECT 1 FROM ${q('meta')} WHERE key = 'catalog_cleanup_v1') THEN
+        DELETE FROM ${q('catalog')}
+         WHERE id = 1
+           AND EXISTS (
+             SELECT 1 FROM jsonb_array_elements(products) p
+              WHERE p->>'subcat' IN ('Sarees', 'Jewellery')
+           );
+        INSERT INTO ${q('meta')} (key, value) VALUES ('catalog_cleanup_v1', NOW()::text);
       END IF;
     END
     $mig$;

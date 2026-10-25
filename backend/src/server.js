@@ -170,7 +170,12 @@ app.get('/api/catalog', async (req, res, next) => {
   try {
     const { rows } = await pool.query('SELECT products, updated_at FROM catalog WHERE id = 1');
     if (rows.length === 0) return res.status(404).json({ error: 'No catalog published yet.' });
-    const products = Array.isArray(rows[0].products) ? rows[0].products : [];
+    const raw = Array.isArray(rows[0].products) ? rows[0].products : [];
+    // Sarees and Jewellery belong to the Raaji store, never Peacock.
+    const products = raw.filter((p) =>
+      !(p.cat === 'Women' && p.subcat === 'Sarees') &&
+      !(p.cat === 'Accessories' && p.subcat === 'Jewellery')
+    );
     res.set('Cache-Control', 'no-store');
     res.json({ products, updated_at: rows[0].updated_at ? new Date(rows[0].updated_at).getTime() : Date.now() });
   } catch (err) {
