@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: peacock-fashions
+    runtime: docker
+    plan: starter
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      # Peacock keeps its tables in its own Postgres schema.
+      # Set DATABASE_URL in the Render dashboard.
+      - key: DB_SCHEMA
+        value: peacock
+      # Optional but recommended: long random value used to sign admin sessions.
+      - key: AUTH_SECRET
+        generateValue: true
+      - key: UPLOAD_DIR
+        value: /data
+    disk:
+      name: peacock-uploads
+      mountPath: /data
+      sizeGB: 1

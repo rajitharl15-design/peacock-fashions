@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop — Peacock Fashions</title>
+  <meta name="description" content="Browse and filter fashion for Men, Women, Kids & Accessories.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/peacock.css?v=6">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <section class="container" style="padding-top:14px">
+    <div class="hcar" id="hcatList"></div>
+  </section>
+
+  <section class="plp-wrap container" style="max-width:none">
+    <!-- Filters -->
+    <aside class="filters">
+      <h4>FILTERS</h4>
+      <div class="filter-group">
+        <span class="label">Category</span>
+        <div id="catList"></div>
+      </div>
+      <div class="filter-group">
+        <span class="label">Price Range</span>
+        <input type="range" class="range" id="priceMax" min="0" max="3000" value="3000" step="50">
+        <div class="price-labels"><span>₹0</span><span id="priceLabel">₹3000</span></div>
+      </div>
+      <button class="btn-pink" id="applyFilters">Apply &amp; Refresh</button>
+    </aside>
+
+    <!-- Results -->
+    <div class="results">
+      <div class="subcat-bar" id="subcatBar"></div>
+      <div class="result-head">
+        <h2 id="resultTitle">All Products</h2>
+        <span class="count" id="resultCount"></span>
+      </div>
+      <div class="result-head" style="justify-content:flex-end">
+        <label style="font-size:.85rem;color:var(--muted)">Sort by
+          <select class="sort-select" id="sortBy">
+            <option value="popularity">Popularity</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+            <option value="discount">Better Discount</option>
+          </select>
+        </label>
+      </div>
+      <div class="pgrid plp" id="plpGrid"></div>
+    </div>
+  </section>
+
+  <div id="app-footer"></div>
+
+  <script src="js/peacock-data.js?v=1"></script>
+  <script src="js/components.js?v=6"></script>
+  <script src="js/peacock.js?v=14"></script>
+</body>
+</html>

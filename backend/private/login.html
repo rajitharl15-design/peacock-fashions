@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Peacock Fashions — Catalog Admin Login</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&family=Playfair+Display:wght@600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root { --primary:#1F5D75; --primary-dark:#143f50; --secondary:#C9A227; --cream:#F8F6F0; --beige:#EAE4D8; --dark:#1b2a20; --text:#25382c; --text-light:#5d6b63; --white:#FFFFFF; --shadow:0 4px 20px rgba(27,42,32,.10); }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:'Poppins',sans-serif; background:var(--cream); color:var(--text); min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
+    .box { background:var(--white); border-radius:12px; box-shadow:var(--shadow); padding:36px; max-width:400px; width:100%; text-align:center; }
+    .badge { width:60px; height:60px; border-radius:50%; margin:0 auto 14px; background:linear-gradient(135deg,#1F5D75,#C9A227); display:grid; place-items:center; color:#fff; font-size:24px; }
+    h1 { font-family:'Playfair Display',serif; font-size:24px; color:var(--dark); margin:0 0 4px; }
+    p { color:var(--text-light); font-size:13px; margin:0 0 18px; }
+    input { width:100%; padding:12px 15px; border:1px solid var(--beige); border-radius:6px; font-size:14px; margin-bottom:12px; outline:none; font-family:'Poppins',sans-serif; background:var(--cream); }
+    input:focus { border-color:var(--primary); }
+    button { width:100%; border:none; cursor:pointer; padding:12px; border-radius:6px; background:var(--primary); color:#fff; font-family:'Poppins',sans-serif; font-size:14px; font-weight:500; }
+    button:hover { background:var(--primary-dark); }
+    .err { color:#D32F2F; font-size:13px; margin-top:10px; min-height:18px; }
+    .back { font-size:12px; color:var(--text-light); margin-top:16px; }
+    .back a { color:var(--primary); text-decoration:none; }
+    .hide { display:none; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <div class="badge"><i class="fas fa-feather"></i></div>
+    <h1 id="title">Peacock Fashions</h1>
+    <p id="subtitle">Catalog Admin</p>
+
+    <!-- First-time setup -->
+    <form id="setupForm" class="hide">
+      <input type="text" id="suUser" placeholder="Choose username" autocomplete="username">
+      <input type="password" id="suPass" placeholder="Choose password (6+ chars)" autocomplete="new-password">
+      <button type="submit">Create Peacock admin</button>
+      <p class="err" id="suErr"></p>
+      <p class="back" style="color:var(--text-light)">This is the FIRST setup. Your Peacock admin credentials are stored securely on the server.</p>
+    </form>
+
+    <!-- Login -->
+    <form id="loginForm">
+      <input type="text" id="username" placeholder="Username" autocomplete="username">
+      <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+      <button type="submit">Sign in</button>
+      <p class="err" id="err"></p>
+    </form>
+    <p class="back"><a href="/">&larr; Back to store</a></p>
+  </div>
+  <script>
+    (function () {
+      var setupForm = document.getElementById('setupForm');
+      var loginForm = document.getElementById('loginForm');
+      var suErr = document.getElementById('suErr');
+      var err = document.getElementById('err');
+
+      fetch('/api/admin/status', { cache: 'no-store' })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d.configured === false) {
+            setupForm.classList.remove('hide');
+            loginForm.classList.add('hide');
+            document.getElementById('title').textContent = 'Set up Peacock admin';
+            document.getElementById('subtitle').textContent = 'Create your credentials';
+          }
+        })
+        .catch(function () {});
+
+      setupForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        suErr.textContent = 'Creating…';
+        try {
+          var res = await fetch('/api/admin/setup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: document.getElementById('suUser').value.trim(), password: document.getElementById('suPass').value }) });
+          var d = await res.json();
+          if (res.ok && d.ok) { suErr.style.color = '#2e7d32'; suErr.textContent = 'Peacock admin created — opening…'; location.href = '/admin'; }
+          else { suErr.style.color = '#D32F2F'; suErr.textContent = d.error || 'Setup failed.'; }
+        } catch (e2) { suErr.textContent = 'Server unavailable.'; }
+      });
+
+      document.getElementById('loginForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        err.textContent = 'Signing in…';
+        try {
+          var res = await fetch('/api/admin/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: document.getElementById('username').value, password: document.getElementById('password').value }) });
+          var d = await res.json();
+          if (res.ok && d.ok) { location.href = '/admin'; }
+          else { err.textContent = d.error || 'Incorrect username or password.'; }
+        } catch (e2) { err.textContent = 'Server unavailable.'; }
+      });
+    })();
+  </script>
+</body>
+</html>

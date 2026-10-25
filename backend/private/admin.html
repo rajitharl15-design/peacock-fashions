@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Peacock Fashions — Catalog Admin</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Poppins', sans-serif; }
+    a { text-decoration: none; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; border: none; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 500; padding: 10px 16px; border-radius: 6px; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
+    .btn-outline:hover { background: var(--primary); color: #fff; }
+    .btn-danger { border-color: #b23b3b; color: #b23b3b; }
+    .btn-danger:hover { background: #b23b3b; color: #fff; }
+    .btn-sm { padding: 8px 12px; font-size: 12px; }
+    :root {
+      --primary: #1F5D75;
+      --primary-dark: #143f50;
+      --secondary: #C9A227;
+      --accent: #b8942a;
+      --cream: #F8F6F0;
+      --beige: #EAE4D8;
+      --dark: #1b2a20;
+      --text: #25382c;
+      --text-light: #5d6b63;
+      --white: #FFFFFF;
+      --shadow: 0 4px 20px rgba(27, 42, 32, 0.1);
+    }
+    .admin-bar { display:flex; gap:16px; align-items:center; flex-wrap:wrap; padding:12px 16px; background:var(--white); border:1px solid var(--beige); border-radius:8px; margin:14px 0; font-size:13px; color:var(--text-light); }
+    .admin-bar b{color:var(--dark);} .admin-bar .saved{color:var(--primary);font-weight:600;}
+    .chip { font-family:'Poppins',sans-serif; font-size:13px; font-weight:500; padding:8px 16px; border:1px solid var(--beige); border-radius:999px; background:var(--white); color:var(--text); cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:all .2s; }
+    .chip:hover{ border-color:var(--primary-dark); color:var(--primary); }
+    .chip-on{ background:var(--primary); border-color:var(--primary); color:#fff; }
+    .btn-sm{ padding:8px 14px; font-size:12px; }
+    .table-card{ background:var(--white); border:1px solid var(--beige); border-radius:10px; overflow:hidden; box-shadow:var(--shadow); }
+    .table-scroll{ overflow:auto; }
+    table.admin-table{ width:100%; border-collapse:collapse; }
+    .admin-table th{ background:var(--cream); text-align:left; font-size:12px; letter-spacing:.4px; text-transform:uppercase; color:var(--text-light); padding:12px 14px; border-bottom:1px solid var(--beige); }
+    .admin-table td{ padding:10px 14px; border-bottom:1px solid var(--beige); vertical-align:middle; }
+    .admin-table tr:hover td{ background:#F7FAF8; }
+    .admin-table tr.row-dirty td{ background:#FBF7EA; }
+    .thumb{ width:46px; height:54px; border-radius:6px; object-fit:cover; background:var(--beige); }
+    .thumb-ph{ width:46px; height:54px; border-radius:6px; display:grid; place-items:center; background:var(--beige); font-size:22px; }
+    .admin-table input,.admin-table select{ font-family:'Poppins',sans-serif; font-size:13px; color:var(--text); padding:8px 10px; border:1px solid var(--beige); border-radius:6px; width:100%; min-width:90px; background:var(--white); }
+    .admin-table input:focus,.admin-table select:focus{ outline:none; border-color:var(--primary); }
+    .admin-table input.narrow{ min-width:76px; width:76px; }
+    td .cat-sel{ width:110px; } td .subcat-sel{ width:140px; }
+    .save-note{ font-size:12px; color:var(--text-light); text-align:right; padding:10px 4px 0; }
+    .token-row{ display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-light); }
+    /* Product list (admin.css .pm-*) */
+    #rows{ margin-top:10px; }
+    .pm-product.pm-del{ opacity:.55; background:#fff6f6; }
+    .pm-id{ font-size:11px; color:var(--text-light); font-weight:400; }
+    .pm-info h4{ margin-bottom:6px; }
+    .hide, .hidden{ display:none !important; }
+    .po-card{ background:var(--white); border:1px solid var(--beige); border-radius:10px; padding:14px; margin-bottom:12px; box-shadow:var(--shadow); }
+    .po-head{ display:flex; justify-content:space-between; font-size:13px; color:var(--text-light); border-bottom:1px solid var(--beige); padding-bottom:8px; margin-bottom:8px; }
+    .po-head b{ color:var(--dark); }
+    .po-body{ font-size:13px; color:var(--text); }
+    .po-body p{ margin:4px 0; }
+    .po-items{ display:flex; flex-direction:column; gap:3px; margin:6px 0; font-size:12px; color:var(--text-light); }
+    .po-total{ font-weight:700; color:var(--primary); }
+    .po-tools{ display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-top:8px; }
+    .po-tools label{ display:flex; flex-direction:column; font-size:11px; color:var(--text-light); gap:3px; }
+    .po-tools select{ font-family:'Poppins',sans-serif; font-size:13px; color:var(--text); padding:7px 10px; border:1px solid var(--beige); border-radius:6px; background:var(--white); }
+    .admin-filters label{ font-size:13px; color:var(--text-light); display:flex; flex-direction:column; gap:5px; }
+    .raf-filter{ font-family:'Poppins',sans-serif; font-size:13px; color:var(--text); padding:9px 12px; border:1px solid var(--beige); border-radius:6px; background:var(--white); min-width:180px; }
+    .np-panel{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; background:var(--white); border:1px solid var(--beige); border-radius:8px; padding:14px; margin:14px 0; }
+    .np-panel input,.np-panel select{ font-family:'Poppins',sans-serif; font-size:13px; color:var(--text); padding:9px 11px; border:1px solid var(--beige); border-radius:6px; background:var(--white); }
+    .np-panel input:focus,.np-panel select:focus{ outline:none; border-color:var(--primary); }
+    .np-panel #npName{ width:200px; }
+    .admin-intro{ font-size:13px; color:var(--text-light); line-height:1.6; margin:12px 0; }
+  </style>
+</head>
+<body class="admin-page">
+
+  <header class="admin-header">
+    <div class="admin-header-inner">
+      <h1>Peacock Fashions <span>Catalog Admin</span></h1>
+      <div class="admin-actions">
+        <a class="admin-link" href="/">View Peacock store</a>
+        <button class="btn btn-outline btn-danger" id="peacockLogoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="admin-main">
+
+    <nav class="admin-tabs">
+      <button class="tab-btn active" data-view="catalog">Manage Catalog</button>
+      <button class="tab-btn" data-view="orders">Orders</button>
+    </nav>
+
+    <div id="view-catalog">
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+      <button class="btn btn-primary" id="addProductBtn"><i class="fas fa-plus"></i> Add product</button>
+    </div>
+    <div class="admin-intro">
+      Edit the Peacock store catalog, then click <b>Save &amp; Publish to store</b> to update the
+      live store immediately. Deleting a product marks it for removal on publish.
+      <i>Export data.js</i> is optional (only if you also want the git repo file updated).
+    </div>
+
+    <div class="admin-bar">
+      <span>Showing <b id="shownCount">0</b> / <b id="totalCount">0</b> products</span>
+      <span class="saved" id="saveStatus"></span>
+      <span style="margin-left:auto;display:flex;gap:8px;align-items:center">
+        <button class="chip" id="reloadBtn">↺ Clear edits</button>
+        <button class="btn btn-outline btn-sm" id="exportBtn">⬇ Export data.js</button>
+        <button class="btn btn-primary btn-sm" id="publishBtn"><i class="fas fa-cloud-upload-alt"></i> Save &amp; Publish to store</button>
+      </span>
+    </div>
+
+    <div id="npPanel" class="np-panel hidden">
+      <input id="npName" placeholder="Product name">
+      <select id="npCat"><option value="">Category…</option></select>
+      <select id="npSubcat"><option value="">Subcategory…</option></select>
+      <input id="npPrice" type="number" min="0" placeholder="Price (₹)">
+      <input id="npOld" type="number" min="0" placeholder="Old price (optional)">
+      <input id="npSize" placeholder="Sizes e.g. S,M,L">
+      <button class="btn btn-primary btn-sm" id="npSave">Add product</button>
+      <span class="pm-saved" id="npStatus"></span>
+    </div>
+
+    <div class="admin-filters" style="align-items:flex-end">
+      <label>Category
+        <select id="catFilter" class="raf-filter"><option value="">All categories</option></select>
+      </label>
+      <label>Subcategory
+        <select id="subcatFilter" class="raf-filter"><option value="">All subcategories</option></select>
+      </label>
+    </div>
+
+    <div class="pm-list" id="rows"></div>
+    <p class="save-note">Edits save to this browser. Use "Publish to store" to make them live.</p>
+    </div>
+
+    <div id="view-orders" class="hidden">
+      <div class="admin-bar"><span>Peacock store orders</span><button class="btn btn-outline btn-sm" id="peacockOrdersRefresh"><i class="fas fa-sync-alt"></i> Refresh</button></div>
+      <div id="peacockOrders"><p class="admin-loading">Loading orders...</p></div>
+    </div>
+
+  </main>
+
+  <script src="js/peacock-data.js"></script>
+  <script src="js/catalog-admin.js"></script>
+  <script>
+    document.getElementById('peacockLogoutBtn').addEventListener('click', async () => {
+      try {
+        localStorage.removeItem('peacock_admin_key');
+        await fetch('/api/admin/logout', { method: 'POST' });
+      } catch (e) {}
+      location.href = '/admin-login';
+    });
+
+    // Tabs: Manage Catalog / Orders
+    document.querySelectorAll('.tab-btn[data-view]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn[data-view]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('view-catalog').classList.toggle('hidden', btn.dataset.view !== 'catalog');
+        document.getElementById('view-orders').classList.toggle('hidden', btn.dataset.view !== 'orders');
+        if (btn.dataset.view === 'orders') loadPeacockOrders();
+      });
+    });
+
+    async function loadPeacockOrders() {
+      const box = document.getElementById('peacockOrders');
+      const key = localStorage.getItem('peacock_admin_key') || '';
+      try {
+        const res = await fetch('/api/admin/orders', { headers: { ...(key ? { 'x-admin-key': key } : {}) } });
+        const d = await res.json();
+        if (!res.ok) throw new Error(d.error || 'Failed (' + res.status + ')');
+        const orders = d.orders || [];
+        if (orders.length === 0) { box.innerHTML = '<p class="admin-loading">No orders yet.</p>'; return; }
+        box.innerHTML = orders.map(o => `
+          <div class="po-card">
+            <div class="po-head">
+              <b>${o.order_number}</b>
+              <span>${new Date(o.created_at).toLocaleString()}</span>
+            </div>
+            <div class="po-body">
+              <p><b>${esc(o.customer_name)}</b> · ${o.phone || ''}</p>
+              <p>${esc(o.address || '')}</p>
+              <div class="po-items">${(o.items || []).map(i => `<span>${i.qty} × ${esc(i.name)}${i.size ? ' (' + esc(i.size) + ')' : ''} — ₹${Number(i.price) * Number(i.qty)}</span>`).join('')}</div>
+              <p class="po-total">Total: ₹${Number(o.total).toLocaleString('en-IN')}</p>
+              <div class="po-tools">
+                <label>Status
+                  <select data-ord-status="${o.id}">
+                    ${['new','packed','shipped','delivered','cancelled'].map(s => `<option value="${s}" ${(o.status||'new')===s?'selected':''}>${s}</option>`).join('')}
+                  </select>
+                </label>
+                <label>Payment
+                  <select data-ord-pay="${o.id}">
+                    ${['pending','paid'].map(s => `<option value="${s}" ${(o.payment_status||'pending')===s?'selected':''}>${s==='pending'?'Unpaid':'Paid'}</option>`).join('')}
+                  </select>
+                </label>
+                ${o.phone ? `<a class="btn btn-outline btn-sm" style="text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/${String(o.phone).replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Hi ' + o.customer_name + ', your Peacock order ' + o.order_number + ' (₹' + o.total + ').')}"><i class="fab fa-whatsapp"></i> WhatsApp customer</a>` : ''}
+                <span class="pm-saved" id="poSaved-${o.id}"></span>
+              </div>
+            </div>
+          </div>`).join('');
+      box.querySelectorAll('[data-ord-status], [data-ord-pay]').forEach(sel => {
+        sel.addEventListener('change', async () => {
+          const id = sel.getAttribute('data-ord-status') || sel.getAttribute('data-ord-pay');
+          const statusSel = box.querySelector('[data-ord-status="' + id + '"]');
+          const paySel = box.querySelector('[data-ord-pay="' + id + '"]');
+          const saved = document.getElementById('poSaved-' + id);
+          if (saved) saved.textContent = 'Saving…';
+          try {
+            const key = localStorage.getItem('peacock_admin_key') || '';
+            const res = await fetch('/api/admin/orders/' + id, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json', ...(key ? { 'x-admin-key': key } : {}) },
+              body: JSON.stringify({ status: statusSel ? statusSel.value : undefined, payment_status: paySel ? paySel.value : undefined }),
+            });
+            const d = await res.json();
+            if (!res.ok) throw new Error(d.error || 'Failed');
+            if (saved) { saved.textContent = '✓ Saved ' + new Date().toLocaleTimeString(); setTimeout(() => saved.textContent = '', 2000); }
+          } catch (err) { if (saved) saved.textContent = '✗ ' + err.message; }
+        });
+      });
+      } catch (err) {
+        box.innerHTML = '<p class="admin-loading">Failed to load orders: ' + esc(err.message) + '</p>';
+      }
+    }
+
+    function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    const orBtn = document.getElementById('peacockOrdersRefresh');
+    if (orBtn) orBtn.addEventListener('click', loadPeacockOrders);
+  </script>
+</body>
+</html>
